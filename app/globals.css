@@ -105,24 +105,11 @@
     transform: none;
   }
 }
-@keyframes sheet-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
 
 /* On-load reveal (hero). --i = stagger index */
 .reveal {
   animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: calc(var(--i, 0) * 90ms);
-}
-.sheet-in {
-  animation: sheet-in 0.2s ease-out both;
 }
 
 /* Scroll reveal with zero JS. Browsers without support just show content. */
@@ -143,5 +130,10 @@
   ::after {
     animation: none !important;
     transition-duration: 0.01ms !important;
+  }
+  /* Exception: the mobile menu keeps its slide-up motion */
+  #mobile-menu,
+  #mobile-menu * {
+    transition-duration: 300ms !important;
   }
 }
