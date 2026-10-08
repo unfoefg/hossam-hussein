@@ -1,26 +1,147 @@
+/* Step 02 — Styling Layer (app/)
+   Single source of truth for design tokens (Tailwind v4 @theme),
+   light + dark palettes, base styles, and the small motion system.
+   Everything else uses semantic classes: bg-primary, text-muted, border-border... */
 @import "tailwindcss";
 
+/* Class-based dark mode (toggled by ThemeToggle, Step 14) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f7f9fc;
+  --surface: #ffffff;
+  --surface-alt: #eaf0f7;
+  --foreground: #111318;
+  --muted: #6b7280;
+  --primary: #004883;
+  --on-primary: #ffffff;
+  --accent: #e32934;
+  --border: #dce4ee;
+  --brand: #004883; /* fixed brand blue, same in both themes */
+}
+
+.dark {
+  --background: #0a0f18;
+  --surface: #111826;
+  --surface-alt: #172134;
+  --foreground: #eef2f8;
+  --muted: #98a3b6;
+  --primary: #5aa6ee;
+  --on-primary: #06101c;
+  --accent: #ff525c;
+  --border: #233048;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-accent: var(--accent);
+  --color-border: var(--border);
+  --color-brand: var(--brand);
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--border);
+  }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 1rem;
+  }
+  @media (min-width: 48rem) {
+    html {
+      scroll-padding-top: 5rem;
+    }
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--accent) 25%, transparent);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Organic, asymmetric profile shapes (two slightly different blobs layered) */
+.shape-blob {
+  border-radius: 58% 42% 46% 54% / 46% 52% 48% 54%;
+}
+.shape-blob-alt {
+  border-radius: 42% 58% 54% 46% / 52% 44% 56% 48%;
+}
+
+/* Blueprint grid — the "designer + developer" texture */
+.blueprint {
+  --_grid: var(--grid-color, color-mix(in oklab, var(--primary) 9%, transparent));
+  background-image:
+    linear-gradient(to right, var(--_grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--_grid) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 35%, #000 25%, transparent 80%);
+}
+
+/* Motion system — subtle only */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* On-load reveal (hero). --i = stagger index */
+.reveal {
+  animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+.sheet-in {
+  animation: sheet-in 0.2s ease-out both;
+}
+
+/* Scroll reveal with zero JS. Browsers without support just show content. */
+@supports (animation-timeline: view()) {
+  .reveal-scroll {
+    animation: rise linear both;
+    animation-timeline: view();
+    animation-range: entry calc(var(--i, 0) * 4%) entry calc(35% + var(--i, 0) * 4%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  ::before,
+  ::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
 }
